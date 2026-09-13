@@ -79,3 +79,49 @@ TEST(PidTest, ResetClearsAccumulatedState) {
     EXPECT_DOUBLE_EQ(pid.update(55.0, 50.0, 0.1),
                      fresh.update(55.0, 50.0, 0.1));
 }
+
+// ---------------------------------------------------------------------------
+// Reverse action, which is what the cooling loop uses
+// ---------------------------------------------------------------------------
+
+namespace {
+
+PidConfig cooling_config() {
+    PidConfig c = basic_config();
+    c.reverse_acting = true;
+    return c;
+}
+
+}  // namespace
+
+TEST(PidReverseTest, HotCoolantCommandsCooling) {
+    Pid pid(cooling_config());
+    // Measured 5 C above setpoint, kp = 2.0, so the output should be 10.0.
+    EXPECT_DOUBLE_EQ(pid.update(45.0, 50.0, 0.1), 10.0);
+}
+
+TEST(PidReverseTest, ColdCoolantCommandsNoCooling) {
+    Pid pid(cooling_config());
+    // Below setpoint there is nothing to reject, so the fan stays off.
+    EXPECT_DOUBLE_EQ(pid.update(45.0, 30.0, 0.1), 0.0);
+}
+
+TEST(PidReverseTest, OutputRisesWithTemperature) {
+    Pid warm(cooling_config());
+    Pid hot(cooling_config());
+
+    const double warm_out = warm.update(45.0, 47.0, 0.1);
+    const double hot_out = hot.update(45.0, 55.0, 0.1);
+
+    EXPECT_GT(hot_out, warm_out);
+}
+
+TEST(PidReverseTest, ForwardAndReverseAreOpposites) {
+    Pid forward(basic_config());
+    Pid reverse(cooling_config());
+
+    // Same inputs, opposite sign before clamping. Forward sees a negative
+    // error here and clamps to zero; reverse sees a positive one.
+    EXPECT_DOUBLE_EQ(forward.update(45.0, 50.0, 0.1), 0.0);
+    EXPECT_GT(reverse.update(45.0, 50.0, 0.1), 0.0);
+}

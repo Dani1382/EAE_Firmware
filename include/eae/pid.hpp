@@ -14,6 +14,14 @@ struct PidConfig {
     // this is fan PWM, so 0 to 100 percent.
     double output_min = 0.0;
     double output_max = 100.0;
+
+    // Direction of action.
+    //
+    // A forward-acting controller raises its output to raise the measured
+    // value, which is how a heater behaves. Cooling is the reverse: more fan
+    // produces a lower temperature, so the error term must be inverted or the
+    // controller drives the fan hardest exactly when the coolant is coldest.
+    bool reverse_acting = false;
 };
 
 /**

@@ -18,7 +18,10 @@ double Pid::update(double setpoint, double measured, double dt) {
         return 0.0;
     }
 
-    const double error = setpoint - measured;
+    // Reverse action inverts the error, so a measurement above the setpoint
+    // produces a positive error and therefore more cooling.
+    const double error = config_.reverse_acting ? (measured - setpoint)
+                                                : (setpoint - measured);
 
     // Proportional term.
     const double p_term = config_.kp * error;

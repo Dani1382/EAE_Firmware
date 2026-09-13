@@ -37,12 +37,14 @@ include(FetchContent)
 FetchContent_Declare(
     cli11
     URL https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.4.2.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
 # GoogleTest: unit testing framework.
 FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
 FetchContent_MakeAvailable(cli11 googletest)
@@ -58,6 +60,7 @@ add_library(eae_core
     src/state_machine.cpp
     src/can_bus.cpp
     src/can_messages.cpp
+    src/thermal_plant.cpp
 )
 
 target_include_directories(eae_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -78,6 +81,7 @@ add_executable(eae_tests
     tests/test_pid.cpp
     tests/test_state_machine.cpp
     tests/test_can.cpp
+    tests/test_thermal_plant.cpp
 )
 target_link_libraries(eae_tests PRIVATE eae_core GTest::gtest_main)
 
