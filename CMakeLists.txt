@@ -56,6 +56,8 @@ FetchContent_MakeAvailable(cli11 googletest)
 add_library(eae_core
     src/pid.cpp
     src/state_machine.cpp
+    src/can_bus.cpp
+    src/can_messages.cpp
 )
 
 target_include_directories(eae_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -75,6 +77,7 @@ include(GoogleTest)
 add_executable(eae_tests
     tests/test_pid.cpp
     tests/test_state_machine.cpp
+    tests/test_can.cpp
 )
 target_link_libraries(eae_tests PRIVATE eae_core GTest::gtest_main)
 
