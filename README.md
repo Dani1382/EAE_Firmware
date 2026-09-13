@@ -73,13 +73,19 @@ against, so what is tested is exactly what runs.
 The state machine decides *whether* the loop is under control; the PID decides
 *how hard* the fan works when it is. Six states:
 
-```
-INIT -> IDLE -> STARTING -> RUNNING
-                    ^           |
-                    |           v
-                    +------- FAULT
-                                |
-         IDLE <- SHUTDOWN <-----+
+```mermaid
+stateDiagram-v2
+    [*] --> INIT
+    INIT --> IDLE
+    IDLE --> STARTING: ignition on
+    STARTING --> RUNNING: circulation settled
+    RUNNING --> FAULT: sensor / low coolant / overtemp
+    FAULT --> STARTING: condition cleared
+    STARTING --> SHUTDOWN: ignition off
+    RUNNING --> SHUTDOWN: ignition off
+    FAULT --> SHUTDOWN: ignition off
+    SHUTDOWN --> IDLE: purge complete
+    SHUTDOWN --> STARTING: ignition back on
 ```
 
 `STARTING` runs the pump for a short prime before the PID is permitted to act.
@@ -167,7 +173,8 @@ than with the control code.
 
 ## AI acknowledgement
 
-Artificial intelligence was used to help structure the project, expand test
-coverage, and improve code presentation. I reviewed the resulting code,
-understand the control logic and the design decisions behind it, and take
-responsibility for the final submitted work.
+I attempted this section to complete a full submission rather than because I had prior firmware experience.
+
+The C++ implementation in this repository was written with AI assistance. I specified what the system needed to do, drawing on the cooling loop analysis and electrical design from the earlier sections, and I reviewed, tested, and can explain the resulting code and the design decisions behind it — including why the PID is reverse-acting, what integral anti-windup prevents, and why the state machine has distinct startup and shutdown states. I would not claim to have written the C++ unaided.
+
+My own engineering contribution is strongest in the system and electrical design: the cooling loop architecture, component selection and integration, and the PLC control logic in the coding section. This repository applies that same control intent in a firmware context.
