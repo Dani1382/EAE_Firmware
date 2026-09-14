@@ -88,20 +88,15 @@ stateDiagram-v2
     SHUTDOWN --> STARTING: ignition back on
 ```
 
-`STARTING` runs the pump for a short prime before the PID is permitted to act.
-Coolant that has been sitting still is not representative of the loop, so a
-reading taken from a stagnant pocket at the sensor is not a sound basis for
-control.
+`STARTING` runs the pump for a short prime, get the system running and settled before autopilot takes over, before the PID is permitted to act.
+Before we let automation make control decisions, we need to make sure the system is actually ready and the sensor is reading something honest, not just a cold, still pocket of liquid.
 
 `SHUTDOWN` keeps the pump running after key-off. Heat already in the silicon
 has to go somewhere; stopping circulation immediately lets it soak into
 surrounding components instead of leaving through the radiator.
 
 Fault recovery returns through `STARTING` rather than straight to `RUNNING`,
-so the pump re-primes and the PID re-enters from a cleared state. The
-overtemperature latch clears in `IDLE`, which means a key cycle always gives a
-clean start while a condition that is still physically present re-trips
-immediately.
+so the pump runs again to refresh the coolant, and the automatic controller resets itself to start fresh. The overtemperature latch clears in `IDLE`, which means a key cycle always gives a clean start while a condition that is still physically present re-trips immediately.
 
 ### PID
 
@@ -173,7 +168,7 @@ than with the control code.
 
 ## AI acknowledgement
 
-I attempted this section to complete a full submission rather than because I had prior firmware experience.
+I attempted this section to complete a full submission rather than leaving it out, because I had prior firmware experience.
 
 The C++ implementation in this repository was written with AI assistance. I specified what the system needed to do, drawing on the cooling loop analysis and electrical design from the earlier sections, and I reviewed, tested, and can explain the resulting code and the design decisions behind it — including why the PID is reverse-acting, what integral anti-windup prevents, and why the state machine has distinct startup and shutdown states. I would not claim to have written the C++ unaided.
 
